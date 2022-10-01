@@ -10,11 +10,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: verify aws install
+    - name: verify aws cli install
       run: |
-        which aws 
         echo aws cli version is `aws --version`
+        
+    - name: verify kubectl cli install
+      run: |
         echo kubetl version is `kubectl version --short --client`
+    
+    - name: install and verify eksctl cli
+      run: |
+        curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+        mv /tmp/eksctl /usr/local/bin
         echo eksctl version is `eksctl version`
       
 #     - name: Configure AWS Credentials
