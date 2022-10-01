@@ -1,0 +1,40 @@
+name: remove eks cluster and node groups
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  setup_eks_cluster:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: verify aws cli install
+      run: |
+        echo aws cli version is `aws --version`
+            
+    - name: install and verify eksctl cli
+      run: |
+        curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+        mv /tmp/eksctl /usr/local/bin
+        echo eksctl version is `eksctl version`
+        
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: us-east-1
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        
+    - name: remove cluster node groups
+      run: |
+        eksctl delete nodegroup --cluster=eksdemo1 --name=eksdemo1-ng-public1 --drain=false
+     
+    - name: wait for 3 minutes
+      run: |
+        sleep 180
+      
+    - name: remove cluster
+      run: | 
+        delete cluster --name eksdemo1
