@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   
 jobs:
-  setup_eks_cluster:
+  remove_eks_cluster:
     runs-on: ubuntu-latest
 
     steps:
