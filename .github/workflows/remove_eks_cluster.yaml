@@ -26,9 +26,9 @@ jobs:
     needs:
       - remove_eks_node_groups
     steps:
-    - name: wait for 3 minutes
+    - name: wait for 5 minutes
       run: |
-        sleep 180
+        sleep 300
 
   remove_eks_cluster:
     runs-on: ubuntu-latest
