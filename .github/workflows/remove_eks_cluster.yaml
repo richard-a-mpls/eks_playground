@@ -37,4 +37,4 @@ jobs:
       
     - name: remove cluster
       run: | 
-        delete cluster --name eksdemo1
+        eksctl delete cluster --name eksdemo1
