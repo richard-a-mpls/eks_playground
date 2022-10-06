@@ -6,76 +6,78 @@ on:
 jobs:
   setup_eks_cluster:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-
-    - name: verify aws cli install
-      run: |
-        echo aws cli version is `aws --version`
-        
-    - name: verify kubectl cli install
-      run: |
-        echo kubetl version is `kubectl version --short --client`
-    
-    - name: install and verify eksctl cli
+    - name: install eksctl cli
       run: |
         curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
         mv /tmp/eksctl /usr/local/bin
-        echo eksctl version is `eksctl version`
-        
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-region: us-east-1
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-#     - name: setup aws cli profile
-#       run: |
-#         aws configure set region "us-east-1"
-#         aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
-#         aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-        
     - name: create eks cluster
       run: |
         eksctl create cluster --name=eksdemo1 \
                       --region=us-east-1 \
                       --zones=us-east-1a,us-east-1b \
                       --without-nodegroup
-      
-    - name: setup IAM profiles
-      run: | 
-        eksctl utils associate-iam-oidc-provider \
-                      --region us-east-1 \
-                      --cluster eksdemo1 \
-                      --approve
 
-    - name: setup eks node groups
-      run: | 
-        eksctl create nodegroup --cluster=eksdemo1 \
-                       --region=us-east-1 \
-                       --name=eksdemo1-ng-public1 \
-                       --node-type=t3.medium \
-                       --nodes=2 \
-                       --nodes-min=2 \
-                       --nodes-max=4 \
-                       --node-volume-size=20 \
-                       --ssh-access \
-                       --ssh-public-key=kube-demo \
-                       --managed \
-                       --asg-access \
-                       --external-dns-access \
-                       --full-ecr-access \
-                       --appmesh-access \
-                       --alb-ingress-access
-        
-#     - name: set eksctl cli
-#       run: |
-#         curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/darwin/amd64/kubectl
-#         chmod +x ./kubectl
-#         mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
-#         echo 'export PATH=$PATH:$HOME/bin' >> ~/.bash_profile
-#         kubectl version --short --client
+  setup_iam_profiles:
+    runs-on: ubuntu-latest
+    needs:
+      - setup_eks_cluster
+    steps:
+      - name: install eksctl cli
+        run: |
+          curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+          mv /tmp/eksctl /usr/local/bin
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: setup IAM profiles
+        run: | 
+          eksctl utils associate-iam-oidc-provider \
+                        --region us-east-1 \
+                        --cluster eksdemo1 \
+                        --approve
+
+  setup_eks_node_groups:
+    runs-on: ubuntu-latest
+    needs:
+      - setup_eks_cluster
+    steps:
+      - name: install eksctl cli
+        run: |
+          curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+          mv /tmp/eksctl /usr/local/bin
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: setup eks node groups
+        run: | 
+          eksctl create nodegroup --cluster=eksdemo1 \
+                         --region=us-east-1 \
+                         --name=eksdemo1-ng-public1 \
+                         --node-type=t3.medium \
+                         --nodes=2 \
+                         --nodes-min=2 \
+                         --nodes-max=4 \
+                         --node-volume-size=20 \
+                         --ssh-access \
+                         --ssh-public-key=kube-demo \
+                         --managed \
+                         --asg-access \
+                         --external-dns-access \
+                         --full-ecr-access \
+                         --appmesh-access \
+                         --alb-ingress-access
         
 
