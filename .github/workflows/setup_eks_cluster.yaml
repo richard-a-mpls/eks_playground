@@ -1,10 +1,11 @@
-name: setup eks cluster and node groups
+name: Setup and Configure EKS Cluster
 
 on:
   workflow_dispatch:
   
 jobs:
   setup_eks_cluster:
+    name: Setup EKS Cluster
     runs-on: ubuntu-latest
     steps:
     - name: install eksctl cli
@@ -25,6 +26,7 @@ jobs:
                       --without-nodegroup
 
   setup_iam_profiles:
+    name: Setup IAM Profiles
     runs-on: ubuntu-latest
     needs:
       - setup_eks_cluster
@@ -47,6 +49,7 @@ jobs:
                         --approve
 
   setup_eks_node_groups:
+    name: Setup EKS Node Groups
     runs-on: ubuntu-latest
     needs:
       - setup_eks_cluster
@@ -81,6 +84,7 @@ jobs:
                          --alb-ingress-access
 
   setup_nginx_ingress_controller:
+    name: Setup Nginx Ingress Controller
     runs-on: ubuntu-latest
     needs:
       - setup_eks_cluster
@@ -91,6 +95,8 @@ jobs:
           aws-region: us-east-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: update kubeconfig
+        run: aws eks update-kubeconfig --name eksdemo1 --profile default --region us-east-1
       - name: setup nginx ingress controller
         run: kubectl apply -f deploy.yaml
         
