@@ -83,6 +83,30 @@ jobs:
                          --appmesh-access \
                          --alb-ingress-access
 
+  setup_namespaces:
+    name: Setup Namespaces
+    runs-on: ubuntu-latest
+    needs:
+      - setup_eks_cluster
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name eksdemo1 --region us-east-1
+      - name: create dev namespace
+        run: kubectl create namespace travlr-profile-api-dev
+      - name: created prod namespace
+        run: kubectl create namespace travlr-profile-api-prod
+      - name: create dev namespace
+        run: kubectl create namespace travlr-web-dev
+      - name: created prod namespace
+        run: kubectl create namespace travlr-web-prod
+
   setup_nginx_ingress_controller:
     name: Setup Nginx Ingress Controller
     runs-on: ubuntu-latest
@@ -102,12 +126,3 @@ jobs:
           aws eks update-kubeconfig --name eksdemo1 --region us-east-1
       - name: setup nginx ingress controller
         run: kubectl apply -f deploy.yaml
-      - name: create dev namespace
-        run: kubectl create namespace travlr-profile-api-dev
-      - name: created prod namespace
-        run: kubectl create namespace travlr-profile-api-prod
-      - name: create dev namespace
-        run: kubectl create namespace travlr-web-dev
-      - name: created prod namespace
-        run: kubectl create namespace travlr-web-prod
-
