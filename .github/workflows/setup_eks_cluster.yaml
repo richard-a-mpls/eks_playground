@@ -102,5 +102,12 @@ jobs:
           aws eks update-kubeconfig --name eksdemo1 --region us-east-1
       - name: setup nginx ingress controller
         run: kubectl apply -f deploy.yaml
-        
+      - name: create dev namespace
+        run: kubectl create namespace travlr-profile-api-dev
+      - name: created prod namespace
+        run: kubectl create namespace travlr-profile-api-prod
+      - name: create dev namespace
+        run: kubectl create namespace travlr-web-dev
+      - name: created prod namespace
+        run: kubectl create namespace travlr-web-prod
 
