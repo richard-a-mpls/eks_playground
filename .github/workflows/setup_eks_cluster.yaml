@@ -111,7 +111,7 @@ jobs:
     name: Setup Nginx Ingress Controller
     runs-on: ubuntu-latest
     needs:
-      - setup_eks_cluster
+      - setup_eks_node_groups
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -126,3 +126,7 @@ jobs:
           aws eks update-kubeconfig --name eksdemo1 --region us-east-1
       - name: setup nginx ingress controller
         run: kubectl apply -f deploy.yaml
+
+#https://towardsdatascience.com/how-to-set-up-ingress-controller-in-aws-eks-d745d9107307:
+#https://aws.amazon.com/blogs/containers/exposing-kubernetes-applications-part-3-nginx-ingress-controller/:
+  # https://aws.amazon.com/premiumsupport/knowledge-center/eks-access-kubernetes-services/:
