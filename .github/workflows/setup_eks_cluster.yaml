@@ -107,6 +107,19 @@ jobs:
       - name: created prod namespace
         run: kubectl create namespace travlr-web-prod
 
+  setup_service_accounts:
+    name: Setup Service Accounts
+    runs-on: ubuntu-latest
+    needs:
+      - setup_namespaces
+    steps:
+      - name: update kubeconfig
+        run: aws eks update-kubeconfig --name eksdemo1 --region us-east-1
+      - name: Setup Service Account
+        run: |
+          eksctl create iamserviceaccount --name sqs-account --namespace travlr-profile-api-dev --cluster eksdemo1 --role-name "sqs-account" \
+          --attach-policy-arn arn:aws:iam::121441139723:policy/sqs-account --approve
+
   setup_nginx_ingress_controller:
     name: Setup Nginx Ingress Controller
     runs-on: ubuntu-latest
